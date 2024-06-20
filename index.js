@@ -21,6 +21,7 @@ const capture = async (page) => {
 const main = async () => {
   console.log('Starting browser...');
   const browser = await puppeteer.launch({
+    headless: 'new',
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--headless'],
   });
   console.log('Started browser proccess...');
