@@ -1,10 +1,7 @@
 const puppeteer = require('puppeteer');
 
-puppeteer
-  .createBrowserFetcher()
-  .download(puppeteer._preferredRevision)
-  .then(() => console.log('Chromium downloaded and installed successfully'))
-  .catch((error) => {
-    console.error('Failed to download and install Chromium', error);
-    process.exit(1);
-  });
+(async () => {
+  const browserFetcher = puppeteer.createBrowserFetcher();
+  const revisionInfo = await browserFetcher.download('1095492');
+  console.log(`Chromium downloaded and installed to ${revisionInfo.folderPath}`);
+})();
