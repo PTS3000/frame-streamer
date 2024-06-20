@@ -25,9 +25,9 @@ const main = async () => {
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--headless'],
   });
   console.log('Started browser proccess...');
-  process.on('exit', () => {
-    browser.close();
-  });
+  // process.on('exit', () => {
+  //   browser.close();
+  // });
 
   const page = await browser.newPage();
   
