@@ -23,7 +23,7 @@ const main = async () => {
   const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--headless'],
   });
-
+  console.log('Started browser proccess...');
   process.on('exit', () => {
     browser.close();
   });
