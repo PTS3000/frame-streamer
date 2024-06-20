@@ -1,4 +1,11 @@
 {
+
+  "name": "my-vercel-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.53",
     "express": "^4.19.2",
