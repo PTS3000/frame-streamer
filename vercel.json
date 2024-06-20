@@ -11,6 +11,14 @@
         "src": "/(.*)",
         "dest": "/index.js"
       }
-    ]
+    ],
+    "build": {
+      "env": {
+        "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true"
+      }
+    },
+    "hooks": {
+      "build": "./install_chromium.sh"
+    }
   }
   
