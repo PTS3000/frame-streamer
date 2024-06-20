@@ -41,10 +41,7 @@ const main = async () => {
   await capture(page);
 };
 
-main().catch(error => {
-  console.error('Error in main:', error);
-  process.exit(1);
-});
+main()
 
 app.get('/api/latest-screenshot', (req, res) => {
   if (latestScreenshotBuffer) {
