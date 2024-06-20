@@ -2,7 +2,7 @@
 FROM oven/bun:latest
 
 # Define arguments with default values if they are not provided
-ARG PORT=3002
+ARG PORT=3000
 # Copy the application code
 COPY . /app
 
