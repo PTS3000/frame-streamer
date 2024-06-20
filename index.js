@@ -21,13 +21,9 @@ const capture = async (page) => {
 const main = async () => {
   console.log('Starting browser...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--headless'],
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox', "--headless"],
   });
-  console.log('Started browser proccess...');
-  // process.on('exit', () => {
-  //   browser.close();
-  // });
 
   const page = await browser.newPage();
   
@@ -41,7 +37,7 @@ const main = async () => {
   await capture(page);
 };
 
-main()
+main();
 
 app.get('/api/latest-screenshot', (req, res) => {
   if (latestScreenshotBuffer) {
