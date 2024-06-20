@@ -29,7 +29,7 @@ const capture = async (page) => {
 
   setTimeout(async () => {
     await capture(page);
-  }, 500); // Reduced interval for faster updates
+  }, 1000); // Reduced interval for faster updates
 };
 
 const main = async () => {
@@ -88,7 +88,7 @@ app.get('/api/stream', (req, res) => {
     }
   };
 
-  const intervalId = setInterval(sendImage, 500); // Reduced interval for faster updates
+  const intervalId = setInterval(sendImage, 1000); // Reduced interval for faster updates
 
   req.on('close', () => {
     clearInterval(intervalId);
