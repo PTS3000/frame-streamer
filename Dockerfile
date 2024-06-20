@@ -3,12 +3,11 @@ FROM oven/bun:latest
 
 # Define arguments with default values if they are not provided
 ARG PORT=3000
-# Copy the application code
-COPY . /app
 
 # Set the working directory
 WORKDIR /app
 
+# Install the necessary libraries for Puppeteer
 RUN apt-get update && apt-get install -y \
   libgconf-2-4 \
   libnss3 \
@@ -24,14 +23,19 @@ RUN apt-get update && apt-get install -y \
   libxcomposite1 \
   libxdamage1 \
   libxrandr2 \
-  libgobject-2.0-0
+  libgobject-2.0-0 \
+  --no-install-recommends && \
+  rm -rf /var/lib/apt/lists/*
 
-RUN bun --revision
-RUN bun install 
+# Copy the application code after dependencies are installed
+COPY . /app
+
+# Install Bun dependencies and Puppeteer browsers
+RUN bun install
 RUN bunx puppeteer browsers install chrome
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE $PORT
 
 # Command to run the application
-CMD ["bun", "./index.js"]
+CMD ["bun", "run", "start"]
