@@ -40,6 +40,7 @@ const main = async () => {
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
+      '--enable-gpu'
       //'--disable-accelerated-2d-canvas',
       //'--disable-gpu'
     ],
