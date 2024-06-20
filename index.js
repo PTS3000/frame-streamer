@@ -40,8 +40,8 @@ const main = async () => {
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--disable-gpu'
+      //'--disable-accelerated-2d-canvas',
+      //'--disable-gpu'
     ],
   });
   const page = await browser.newPage();
