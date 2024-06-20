@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.53",
+    "express": "^4.19.2",
+    "fs": "^0.0.1-security",
+    "mjpeg-server": "^0.3.1",
+    "path": "^0.12.7",
+    "puppeteer": "^22.11.2"
+  }
+}
