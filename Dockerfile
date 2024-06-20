@@ -2,7 +2,7 @@
 FROM oven/bun:latest
 
 # Define arguments with default values if they are not provided
-ARG PORT=3000
+ARG PORT=3002
 # Copy the application code
 COPY . /app
 
@@ -14,7 +14,7 @@ RUN bun install
 RUN bunx puppeteer browsers install chrome
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 3002
 
 # Command to run the application
-CMD ["bun", "./index.js"]
+CMD ["bun", "index.js"]
