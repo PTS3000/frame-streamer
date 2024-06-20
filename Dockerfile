@@ -17,4 +17,4 @@ RUN bunx puppeteer browsers install chrome
 EXPOSE 3002
 
 # Command to run the application
-CMD ["bun", "./index.ts"]
+CMD ["bun", "./index.js"]
