@@ -9,6 +9,23 @@ COPY . /app
 # Set the working directory
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y \
+  libgconf-2-4 \
+  libnss3 \
+  libxss1 \
+  libasound2 \
+  libatk1.0-0 \
+  libatk-bridge2.0-0 \
+  libcups2 \
+  libgbm1 \
+  libgtk-3-0 \
+  libpango-1.0-0 \
+  libx11-xcb1 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxrandr2 \
+  libgobject-2.0-0
+
 RUN bun --revision
 RUN bun install 
 RUN bunx puppeteer browsers install chrome
