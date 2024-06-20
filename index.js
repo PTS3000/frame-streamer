@@ -1,52 +1,66 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-let latestScreenshotBuffer = null;
+let idx = 0;
+let latestScreenshotPath = '';
 
 const capture = async (page) => {
-  try {
-    latestScreenshotBuffer = await page.screenshot({ encoding: 'binary' });
-  } catch (error) {
-    console.error('Screenshot capture failed:', error);
+  idx++;
+  const newScreenshotPath = path.join(__dirname, `screenshot${String(idx).padStart(4, '0')}.png`);
+  
+  // Capture the new screenshot
+  await page.screenshot({ path: newScreenshotPath, fullPage: false, omitBackground: true });
+
+  // Delete the old screenshot if it exists
+  if (latestScreenshotPath) {
+    fs.unlink(latestScreenshotPath, (err) => {
+      if (err) console.error(`Failed to delete ${latestScreenshotPath}:`, err);
+      else console.log(`Deleted ${latestScreenshotPath}`);
+    });
   }
+
+  // Update the latest screenshot path
+  latestScreenshotPath = newScreenshotPath;
 
   setTimeout(async () => {
     await capture(page);
-  }, 50); // Adjust interval for performance
+  }, 500); // Reduced interval for faster updates
 };
 
 const main = async () => {
   console.log('Starting browser...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--headless'],
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu'
+    ],
   });
-  console.log('Started browser proccess...');
-  // process.on('exit', () => {
-  //   browser.close();
-  // });
-
   const page = await browser.newPage();
   
   console.log('Loading page...');
-  await page.goto('https://game.manada.dev/?cinematic');
+  await page.goto('https://game.manada.dev/?cinematic', { waitUntil: 'networkidle2' });
   
   console.log('Waiting to load...');
-  await new Promise((resolve) => setTimeout(resolve, 10000));
+  await new Promise((resolve) => setTimeout(resolve, 5000)); // Reduced waiting time
 
   console.log('Capturing screenshots...');
   await capture(page);
 };
 
-main()
+main();
 
 app.get('/api/latest-screenshot', (req, res) => {
-  if (latestScreenshotBuffer) {
-    res.set('Content-Type', 'image/png');
-    res.send(latestScreenshotBuffer);
+  if (latestScreenshotPath) {
+    res.sendFile(latestScreenshotPath);
   } else {
     res.status(404).send('No screenshot available');
   }
@@ -60,14 +74,21 @@ app.get('/api/stream', (req, res) => {
   });
 
   const sendImage = () => {
-    if (latestScreenshotBuffer) {
-      res.write(`--frame\r\nContent-Type: image/png\r\nContent-Length: ${latestScreenshotBuffer.length}\r\n\r\n`);
-      res.write(latestScreenshotBuffer);
-      res.write('\r\n');
+    if (latestScreenshotPath) {
+      fs.readFile(latestScreenshotPath, (err, data) => {
+        if (err) {
+          console.error('Failed to read image:', err);
+          return;
+        }
+
+        res.write(`--frame\r\nContent-Type: image/png\r\nContent-Length: ${data.length}\r\n\r\n`);
+        res.write(data);
+        res.write('\r\n');
+      });
     }
   };
 
-  const intervalId = setInterval(sendImage, 50);
+  const intervalId = setInterval(sendImage, 500); // Reduced interval for faster updates
 
   req.on('close', () => {
     clearInterval(intervalId);
