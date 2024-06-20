@@ -14,7 +14,7 @@ RUN bun install
 RUN bunx puppeteer browsers install chrome
 
 # Expose the port the app runs on
-EXPOSE 3002
+EXPOSE 3000
 
 # Command to run the application
 CMD ["bun", "./index.js"]
