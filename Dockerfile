@@ -9,7 +9,7 @@ RUN apk add --no-cache \
       ca-certificates \
       ttf-freefont \
       nodejs \
-      yarn \
+      npm \
       xvfb \
       # Dependencies for xvfb-run
       xorg-server \
@@ -20,6 +20,7 @@ RUN apk add --no-cache \
 # Create xvfb-run script
 RUN echo '#!/bin/sh' > /usr/bin/xvfb-run \
     && echo 'Xvfb :99 -screen 0 1280x720x24 -ac +extension GLX +render -noreset &' >> /usr/bin/xvfb-run \
+    && echo 'export DISPLAY=:99' >> /usr/bin/xvfb-run \
     && echo '$@' >> /usr/bin/xvfb-run \
     && chmod +x /usr/bin/xvfb-run
 
@@ -29,11 +30,11 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and yarn.lock files
-COPY package.json yarn.lock ./
+# Copy package.json and package-lock.json files
+COPY package.json package-lock.json ./
 
 # Install project dependencies
-RUN yarn install
+RUN npm install
 
 # Copy the rest of the application code
 COPY . .
