@@ -14,7 +14,7 @@ RUN apk add --no-cache \
 # Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-ARG PORT=3002
+ARG PORT=3000
 # Copy the application code
 COPY . /app
 
@@ -25,7 +25,7 @@ RUN yarn add puppeteer@13.5.0
 RUN yarn install 
 
 # Expose the port the app runs on
-EXPOSE 3002
+EXPOSE 3000
 
 
 RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
