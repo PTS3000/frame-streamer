@@ -16,19 +16,16 @@ const capture = async (page) => {
   // Capture the new screenshot
   await page.screenshot({ path: newScreenshotPath, fullPage: false, omitBackground: true });
 
-  // Update the latest screenshot path
-  const previousScreenshotPath = latestScreenshotPath;
-  latestScreenshotPath = newScreenshotPath;
-
-  // Schedule deletion of the old screenshot after a delay
-  if (previousScreenshotPath) {
-    setTimeout(() => {
-      fs.unlink(previousScreenshotPath, (err) => {
-        if (err) console.error(`Failed to delete ${previousScreenshotPath}:`, err);
-        else console.log(`Deleted ${previousScreenshotPath}`);
-      });
-    }, 5000); // Delay deletion by 5 seconds
+  // Delete the old screenshot if it exists
+  if (latestScreenshotPath) {
+    fs.unlink(latestScreenshotPath, (err) => {
+      if (err) console.error(`Failed to delete ${latestScreenshotPath}:`, err);
+      else console.log(`Deleted ${latestScreenshotPath}`);
+    });
   }
+
+  // Update the latest screenshot path
+  latestScreenshotPath = newScreenshotPath;
 
   setTimeout(async () => {
     await capture(page);
@@ -43,12 +40,9 @@ const main = async () => {
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
-      '--enable-gpu',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-dev-tools',
-      '--disable-software-rasterizer'
+      '--enable-gpu'
+      //'--disable-accelerated-2d-canvas',
+      //'--disable-gpu'
     ],
   });
   const page = await browser.newPage();
