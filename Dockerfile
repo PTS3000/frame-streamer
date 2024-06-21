@@ -15,8 +15,6 @@ RUN apk add --no-cache \
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 ARG PORT=3000
-# Copy the application code
-COPY . /app
 
 # Set the working directory
 WORKDIR /app
