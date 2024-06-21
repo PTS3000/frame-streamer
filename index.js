@@ -6,32 +6,22 @@ const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 
-let idx = 0;
-let latestScreenshotPath = '';
+// Path to the fixed image
+const fixedImagePath = path.join(__dirname, 'fixed-screenshot.png');
 
+// Function to capture screenshots (remains unchanged)
 const capture = async (page) => {
-  idx++;
-  const newScreenshotPath = path.join(__dirname, `screenshot${String(idx).padStart(4, '0')}.png`);
+  const newScreenshotPath = path.join(__dirname, 'latest-screenshot.png');
   
   // Capture the new screenshot
   await page.screenshot({ path: newScreenshotPath, fullPage: false, omitBackground: true });
-
-  // Delete the old screenshot if it exists
-  if (latestScreenshotPath) {
-    fs.unlink(latestScreenshotPath, (err) => {
-      if (err) console.error(`Failed to delete ${latestScreenshotPath}:`, err);
-      else console.log(`Deleted ${latestScreenshotPath}`);
-    });
-  }
-
-  // Update the latest screenshot path
-  latestScreenshotPath = newScreenshotPath;
 
   setTimeout(async () => {
     await capture(page);
   }, 1000); // Reduced interval for faster updates
 };
 
+// Main function to start the browser and begin capturing screenshots
 const main = async () => {
   console.log('Starting browser...');
   const browser = await puppeteer.launch({
@@ -40,9 +30,12 @@ const main = async () => {
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
-      '--enable-gpu'
-      //'--disable-accelerated-2d-canvas',
-      //'--disable-gpu'
+      '--enable-gpu',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-dev-tools',
+      '--disable-software-rasterizer'
     ],
   });
   const page = await browser.newPage();
@@ -60,11 +53,12 @@ const main = async () => {
 main();
 
 app.get('/api/latest-screenshot', (req, res) => {
-  if (latestScreenshotPath) {
-    res.sendFile(latestScreenshotPath);
-  } else {
-    res.status(404).send('No screenshot available');
-  }
+  res.sendFile(fixedImagePath, (err) => {
+    if (err) {
+      console.error('Failed to send image:', err);
+      res.status(500).send('Failed to send image');
+    }
+  });
 });
 
 app.get('/api/stream', (req, res) => {
@@ -75,18 +69,16 @@ app.get('/api/stream', (req, res) => {
   });
 
   const sendImage = () => {
-    if (latestScreenshotPath) {
-      fs.readFile(latestScreenshotPath, (err, data) => {
-        if (err) {
-          console.error('Failed to read image:', err);
-          return;
-        }
+    fs.readFile(fixedImagePath, (err, data) => {
+      if (err) {
+        console.error('Failed to read image:', err);
+        return;
+      }
 
-        res.write(`--frame\r\nContent-Type: image/png\r\nContent-Length: ${data.length}\r\n\r\n`);
-        res.write(data);
-        res.write('\r\n');
-      });
-    }
+      res.write(`--frame\r\nContent-Type: image/png\r\nContent-Length: ${data.length}\r\n\r\n`);
+      res.write(data);
+      res.write('\r\n');
+    });
   };
 
   const intervalId = setInterval(sendImage, 1000); // Reduced interval for faster updates
