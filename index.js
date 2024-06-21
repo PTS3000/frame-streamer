@@ -1,36 +1,34 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
+const path = require('path');
+const fs = require('fs');
+
 const app = express();
 const port = process.env.PORT || 3000;
+
 let latestScreenshotBuffer = null;
+
 const capture = async (page) => {
-  try {
-    latestScreenshotBuffer = await page.screenshot({ encoding: 'binary' });
-  } catch (error) {
-    console.error('Screenshot capture failed:', error);
-  }
+  const buffer = await page.screenshot({ encoding: 'binary' });
+  latestScreenshotBuffer = buffer;
+
   setTimeout(async () => {
     await capture(page);
-  }, 50); // Adjust interval for performance
+  }, 100); // 1-second interval
 };
 
 const main = async () => {
   console.log('Starting browser...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--headless'
-    ],
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
   
   console.log('Loading page...');
-  await page.goto('https://game.manada.dev/?cinematic', { waitUntil: 'networkidle2' });
+  await page.goto('https://game.manada.dev/?cinematic');
   
   console.log('Waiting to load...');
-  await new Promise((resolve) => setTimeout(resolve, 5000)); // Reduced waiting time
+  await new Promise((resolve) => setTimeout(resolve, 10000));
 
   console.log('Capturing screenshots...');
   await capture(page);
@@ -46,12 +44,14 @@ app.get('/api/latest-screenshot', (req, res) => {
     res.status(404).send('No screenshot available');
   }
 });
+
 app.get('/api/stream', (req, res) => {
   res.writeHead(200, {
     'Cache-Control': 'no-cache',
     'Pragma': 'no-cache',
     'Content-Type': 'multipart/x-mixed-replace; boundary=frame',
   });
+
   const sendImage = () => {
     if (latestScreenshotBuffer) {
       res.write(`--frame\r\nContent-Type: image/png\r\nContent-Length: ${latestScreenshotBuffer.length}\r\n\r\n`);
@@ -59,11 +59,14 @@ app.get('/api/stream', (req, res) => {
       res.write('\r\n');
     }
   };
-  const intervalId = setInterval(sendImage, 50);
+
+  const intervalId = setInterval(sendImage, 100);
+
   req.on('close', () => {
     clearInterval(intervalId);
   });
 });
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
