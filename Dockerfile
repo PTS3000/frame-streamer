@@ -1,6 +1,6 @@
-FROM alpine
+FROM node:20-alpine
 
-
+# Install necessary dependencies for Puppeteer and Xvfb
 RUN apk add --no-cache \
       chromium \
       nss \
@@ -10,18 +10,30 @@ RUN apk add --no-cache \
       ttf-freefont \
       nodejs \
       yarn \
-      xvfb
+      xvfb \
+      # Dependencies for xvfb-run
+      xorg-server \
+      xinit \
+      xrandr \
+      dbus
+
+# Create xvfb-run script
+RUN echo '#!/bin/sh' > /usr/bin/xvfb-run \
+    && echo 'Xvfb :99 -screen 0 1280x720x24 -ac +extension GLX +render -noreset &' >> /usr/bin/xvfb-run \
+    && echo '$@' >> /usr/bin/xvfb-run \
+    && chmod +x /usr/bin/xvfb-run
 
 # Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-ARG PORT=3000
-
 # Set the working directory
 WORKDIR /app
 
-RUN yarn add puppeteer@13.5.0 
-RUN yarn install 
+# Copy package.json and yarn.lock files
+COPY package.json yarn.lock ./
+
+# Install project dependencies
+RUN yarn install
 
 # Copy the rest of the application code
 COPY . .
@@ -29,13 +41,13 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 3000
 
-
+# Add and use a non-privileged user
 RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
     && mkdir -p /home/pptruser/Downloads /app \
     && chown -R pptruser:pptruser /home/pptruser \
     && chown -R pptruser:pptruser /app
 
-# Run everything after as non-privileged user.
 USER pptruser
+
 # Command to run the application
-CMD ["xvfb-run", "--auto-servernum", "--server-args=-screen 0 1280x720x24", "node", "index.js"]
+CMD ["xvfb-run", "node", "index.js"]
