@@ -22,6 +22,9 @@ WORKDIR /app
 RUN yarn add puppeteer@13.5.0 
 RUN yarn install 
 
+# Copy the rest of the application code
+COPY . .
+
 # Expose the port the app runs on
 EXPOSE 3000
 
