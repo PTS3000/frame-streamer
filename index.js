@@ -55,7 +55,7 @@ const sendScreenshotFrame = (req, res) => {
             property="fc:frame:image"
             content="https://frame-manada-trial-20.localcan.dev/api/single-screenshot"
             />
-            <meta property="fc:frame:button:1" content="Start" />
+            <meta property="fc:frame:button:1" content="Donate" />
             <meta
             property="fc:frame:post_url"
             content="https://frame-manada-trial-20.localcan.dev/api/next-frame"
