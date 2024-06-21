@@ -7,7 +7,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Path to the fixed image
-const fixedImagePath = path.join(__dirname, 'fixed-screenshot.png');
+const fixedImagePath = path.join(__dirname, 'image.png');
 
 // Function to capture screenshots (remains unchanged)
 const capture = async (page) => {
