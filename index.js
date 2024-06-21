@@ -2,7 +2,7 @@ const express = require('express');
 const puppeteer = require('puppeteer');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 let latestScreenshotBuffer = null;
 
@@ -18,27 +18,17 @@ const capture = async (page) => {
 const main = async () => {
   console.log('Starting browser...');
   const browser = await puppeteer.launch({
-    args: ['--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-gpu',
-    '--use-gl=swiftshader',
-    '--enable-webgl',
-    '--ignore-gpu-blacklist',
-    '--swiftshader'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: 'new'
   });
   const page = await browser.newPage();
 
-  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
-  page.on('error', error => console.log('ERROR:', error));
-
   console.log('Setting viewport...');
   await page.setViewport({ width: 1280, height: 720 });
-  
+
   console.log('Loading page...');
   await page.goto('https://game.manada.dev/?cinematic');
-  
+
   console.log('Waiting to load...');
   await new Promise((resolve) => setTimeout(resolve, 10000));
 
@@ -48,14 +38,50 @@ const main = async () => {
 
 main();
 
-app.get('/api/latest-screenshot', (req, res) => {
+const sendScreenshotFrame = (req, res) => {
+  if (latestScreenshotBuffer) {
+    res.set('Content-Type', 'text/html');
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Latest frame</title>
+            <meta
+            property="og:image"
+            content="https://frame-manada-trial-20.localcan.dev/api/single-screenshot"
+            />
+            <meta property="fc:frame" content="vNext" />
+            <meta
+            property="fc:frame:image"
+            content="https://frame-manada-trial-20.localcan.dev/api/single-screenshot"
+            />
+            <meta property="fc:frame:button:1" content="Start" />
+            <meta
+            property="fc:frame:post_url"
+            content="https://frame-manada-trial-20.localcan.dev/api/next-frame"
+            />
+        </head>
+        <body>
+            <h1>Basic Frame</h1>
+        </body>
+        </html>
+    `);
+  } else {
+    res.status(404).send('No screenshot available');
+  }
+};
+
+const sendLatestScreenshot = (req, res) => {
   if (latestScreenshotBuffer) {
     res.set('Content-Type', 'image/png');
     res.send(latestScreenshotBuffer);
   } else {
     res.status(404).send('No screenshot available');
   }
-});
+};
+
+app.get('/api/next-frame', sendScreenshotFrame);
+app.get('/api/single-screenshot', sendLatestScreenshot);
 
 app.get('/api/stream', (req, res) => {
   res.writeHead(200, {
