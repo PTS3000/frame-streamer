@@ -6,22 +6,35 @@ const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Path to the fixed image
-const fixedImagePath = path.join(__dirname, 'image.jpg');
+let idx = 0;
+let latestScreenshotPath = '';
 
-// Function to capture screenshots (remains unchanged)
 const capture = async (page) => {
-  const newScreenshotPath = path.join(__dirname, 'latest-screenshot.png');
+  idx++;
+  const newScreenshotPath = path.join(__dirname, `screenshot${String(idx).padStart(4, '0')}.png`);
   
   // Capture the new screenshot
   await page.screenshot({ path: newScreenshotPath, fullPage: false, omitBackground: true });
+
+  // Update the latest screenshot path
+  const previousScreenshotPath = latestScreenshotPath;
+  latestScreenshotPath = newScreenshotPath;
+
+  // Schedule deletion of the old screenshot after a delay
+  if (previousScreenshotPath) {
+    setTimeout(() => {
+      fs.unlink(previousScreenshotPath, (err) => {
+        if (err) console.error(`Failed to delete ${previousScreenshotPath}:`, err);
+        else console.log(`Deleted ${previousScreenshotPath}`);
+      });
+    }, 5000); // Delay deletion by 5 seconds
+  }
 
   setTimeout(async () => {
     await capture(page);
   }, 1000); // Reduced interval for faster updates
 };
 
-// Main function to start the browser and begin capturing screenshots
 const main = async () => {
   console.log('Starting browser...');
   const browser = await puppeteer.launch({
@@ -53,12 +66,11 @@ const main = async () => {
 main();
 
 app.get('/api/latest-screenshot', (req, res) => {
-  res.sendFile(fixedImagePath, (err) => {
-    if (err) {
-      console.error('Failed to send image:', err);
-      res.status(500).send('Failed to send image');
-    }
-  });
+  if (latestScreenshotPath) {
+    res.sendFile(latestScreenshotPath);
+  } else {
+    res.status(404).send('No screenshot available');
+  }
 });
 
 app.get('/api/stream', (req, res) => {
@@ -69,16 +81,18 @@ app.get('/api/stream', (req, res) => {
   });
 
   const sendImage = () => {
-    fs.readFile(fixedImagePath, (err, data) => {
-      if (err) {
-        console.error('Failed to read image:', err);
-        return;
-      }
+    if (latestScreenshotPath) {
+      fs.readFile(latestScreenshotPath, (err, data) => {
+        if (err) {
+          console.error('Failed to read image:', err);
+          return;
+        }
 
-      res.write(`--frame\r\nContent-Type: image/png\r\nContent-Length: ${data.length}\r\n\r\n`);
-      res.write(data);
-      res.write('\r\n');
-    });
+        res.write(`--frame\r\nContent-Type: image/png\r\nContent-Length: ${data.length}\r\n\r\n`);
+        res.write(data);
+        res.write('\r\n');
+      });
+    }
   };
 
   const intervalId = setInterval(sendImage, 1000); // Reduced interval for faster updates
