@@ -1,7 +1,5 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
-const path = require('path');
-const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,13 +12,14 @@ const capture = async (page) => {
 
   setTimeout(async () => {
     await capture(page);
-  }, 100); // 1-second interval
+  }, 1000); // 1-second interval
 };
 
 const main = async () => {
   console.log('Starting browser...');
   const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: 'new'
   });
   const page = await browser.newPage();
   
@@ -60,7 +59,7 @@ app.get('/api/stream', (req, res) => {
     }
   };
 
-  const intervalId = setInterval(sendImage, 100);
+  const intervalId = setInterval(sendImage, 1000);
 
   req.on('close', () => {
     clearInterval(intervalId);
