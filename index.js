@@ -22,6 +22,12 @@ const main = async () => {
     headless: 'new'
   });
   const page = await browser.newPage();
+
+  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+  page.on('error', error => console.log('ERROR:', error));
+
+  console.log('Setting viewport...');
+  await page.setViewport({ width: 1280, height: 720 });
   
   console.log('Loading page...');
   await page.goto('https://game.manada.dev/?cinematic');
