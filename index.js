@@ -2,7 +2,7 @@ const express = require("express");
 const puppeteer = require("puppeteer");
 
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 3000;
 
 let latestScreenshotBuffer = null;
 
@@ -127,35 +127,6 @@ app.post("/api/next-frame", handlePostRequest);
 app.get("/api/single-screenshot", sendLatestScreenshot);
 
 const clients = [];
-
-app.get("/", (req, res) => {
-  res.send(`
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <title>Welcome to the Jungle</title>
-      <meta
-        property="og:image"
-        content="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream"
-      />
-      <meta property="fc:frame" content="vNext" />
-      <meta
-        property="fc:frame:image"
-        content="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream"
-      />
-      <meta property="fc:frame:button:1" content="Start" />
-      <meta
-        property="fc:frame:post_url"
-        content="https://frame-manada-trial-20.localcan.dev/api/next-frame"
-      />
-      
-    </head>
-    <body>
-      <h1>Cloudlines Frame</h1>
-    </body>
-  </html>
-`);
-});
 
 app.get("/api/mjpeg-stream", (req, res) => {
   var headers = {};
