@@ -1,20 +1,16 @@
 {
-  "name": "my-vercel-app",
+  "name": "manada-frame-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.tsx",
   "scripts": {
-    "start": "node index.js"
+    "dev": "bun run --hot src/index.tsx"
   },
   "dependencies": {
-    "express": "^4.17.1",
     "hono": "^4.4.7",
     "puppeteer": "^19.11.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "sharp": "^0.33.4"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.5",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0"
+    "@types/bun": "latest"
   }
 }
