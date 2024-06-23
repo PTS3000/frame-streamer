@@ -130,7 +130,7 @@ const main = async () => {
     
     latestScreenshotBuffer = await sharp(buffer)
     .resize(640)
-    .toFormat('avif')
+    .avif({ effort: 2 })
     .toBuffer();
 
     setTimeout(async () => {
