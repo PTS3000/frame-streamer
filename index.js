@@ -120,18 +120,19 @@ app.get('/api/single-screenshot', sendLatestScreenshot);
 const clients = [];
 
 app.get('/api/mjpeg-stream', (req, res) => {
-  const headers = {
-    'Cache-Control': 'private, no-cache, no-store, max-age=0',
-    'Content-Type': 'multipart/x-mixed-replace; boundary=mjpeg',
-    'Connection': 'close',
-    'Pragma': 'no-cache',
-  };
+  var headers = {};
+  var multipart = '--mjpeg';
+
+  headers['Cache-Control'] = 'private, no-cache, no-store, max-age=0';
+  headers['Content-Type'] = 'multipart/x-mixed-replace; boundary="' + multipart + '"';
+  headers.Connection = 'close';
+  headers.Pragma = 'no-cache';
 
   res.writeHead(200, headers);
 
   const client = {
     mjpegwrite: (buffer) => {
-      res.write('--mjpeg\r\n', 'ascii');
+      res.write('--' + multipart + '\r\n', 'ascii');
       res.write('Content-Type: image/jpeg\r\n');
       res.write('Content-Length: ' + buffer.length + '\r\n');
       res.write('\r\n', 'ascii');
