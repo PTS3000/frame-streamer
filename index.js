@@ -1,5 +1,5 @@
-const express = require('express');
-const puppeteer = require('puppeteer');
+const express = require("express");
+const puppeteer = require("puppeteer");
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -7,7 +7,7 @@ const port = process.env.PORT || 8080;
 let latestScreenshotBuffer = null;
 
 const capture = async (page) => {
-  const buffer = await page.screenshot({ encoding: 'binary' });
+  const buffer = await page.screenshot({ encoding: "binary" });
   latestScreenshotBuffer = buffer;
 
   setTimeout(async () => {
@@ -16,23 +16,23 @@ const capture = async (page) => {
 };
 
 const main = async () => {
-  console.log('Starting browser...');
+  console.log("Starting browser...");
   const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: 'new'
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    headless: "new",
   });
   const page = await browser.newPage();
 
-  console.log('Setting viewport...');
+  console.log("Setting viewport...");
   await page.setViewport({ width: 1280, height: 720 });
 
-  console.log('Loading page...');
-  await page.goto('https://game.manada.dev/?cinematic');
+  console.log("Loading page...");
+  await page.goto("https://game.manada.dev/?cinematic");
 
-  console.log('Waiting to load...');
+  console.log("Waiting to load...");
   await new Promise((resolve) => setTimeout(resolve, 10000));
 
-  console.log('Capturing screenshots...');
+  console.log("Capturing screenshots...");
   await capture(page);
 };
 
@@ -41,11 +41,14 @@ main();
 const sendScreenshotFrame = (req, res) => {
   const timestamp = Date.now();
   if (latestScreenshotBuffer) {
-    res.set('Content-Type', 'text/html');
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-    res.set('Surrogate-Control', 'no-store');
+    res.set("Content-Type", "text/html");
+    res.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate"
+    );
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+    res.set("Surrogate-Control", "no-store");
     res.send(`
         <!DOCTYPE html>
         <html>
@@ -65,18 +68,21 @@ const sendScreenshotFrame = (req, res) => {
         </html>
     `);
   } else {
-    res.status(404).send('No screenshot available');
+    res.status(404).send("No screenshot available");
   }
 };
 
 const handlePostRequest = (req, res) => {
   const timestamp = Date.now();
   if (latestScreenshotBuffer) {
-    res.set('Content-Type', 'text/html');
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-    res.set('Surrogate-Control', 'no-store');
+    res.set("Content-Type", "text/html");
+    res.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate"
+    );
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+    res.set("Surrogate-Control", "no-store");
     res.send(`
         <!DOCTYPE html>
         <html>
@@ -96,48 +102,81 @@ const handlePostRequest = (req, res) => {
         </html>
     `);
   } else {
-    res.status(404).send('No screenshot available');
+    res.status(404).send("No screenshot available");
   }
 };
 
 const sendLatestScreenshot = (req, res) => {
   if (latestScreenshotBuffer) {
-    res.set('Content-Type', 'image/png');
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-    res.set('Surrogate-Control', 'no-store');
+    res.set("Content-Type", "image/png");
+    res.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate"
+    );
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+    res.set("Surrogate-Control", "no-store");
     res.send(latestScreenshotBuffer);
   } else {
-    res.status(404).send('No screenshot available');
+    res.status(404).send("No screenshot available");
   }
 };
 
-app.get('/api/next-frame', sendScreenshotFrame);
-app.post('/api/next-frame', handlePostRequest);
-app.get('/api/single-screenshot', sendLatestScreenshot);
+app.get("/api/next-frame", sendScreenshotFrame);
+app.post("/api/next-frame", handlePostRequest);
+app.get("/api/single-screenshot", sendLatestScreenshot);
 
 const clients = [];
 
-app.get('/api/mjpeg-stream', (req, res) => {
-  var headers = {};
-  var multipart = '--mjpeg';
+app.get("/", (req, res) => {
+  res.send(`
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title>Welcome to the Jungle</title>
+      <meta
+        property="og:image"
+        content="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream"
+      />
+      <meta property="fc:frame" content="vNext" />
+      <meta
+        property="fc:frame:image"
+        content="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream"
+      />
+      <meta property="fc:frame:button:1" content="Start" />
+      <meta
+        property="fc:frame:post_url"
+        content="https://frame-manada-trial-20.localcan.dev/api/next-frame"
+      />
+      
+    </head>
+    <body>
+      <h1>Cloudlines Frame</h1>
+    </body>
+  </html>
+`);
+});
 
-  headers['Cache-Control'] = 'private, no-cache, no-store, max-age=0';
-  headers['Content-Type'] = 'multipart/x-mixed-replace; boundary="' + multipart + '"';
-  headers.Connection = 'close';
-  headers.Pragma = 'no-cache';
+app.get("/api/mjpeg-stream", (req, res) => {
+  var headers = {};
+  var multipart = "--mjpeg";
+
+  headers["Cache-Control"] = "private, no-cache, no-store, max-age=0";
+  headers["Content-Type"] =
+    'multipart/x-mixed-replace; boundary="' + multipart + '"';
+  headers.Connection = "close";
+  headers.Pragma = "no-cache";
 
   res.writeHead(200, headers);
 
   const client = {
     mjpegwrite: (buffer) => {
-      res.write('--' + multipart + '\r\n', 'ascii');
-      res.write('Content-Type: image/jpeg\r\n');
-      res.write('Content-Length: ' + buffer.length + '\r\n');
-      res.write('\r\n', 'ascii');
-      res.write(buffer, 'binary');
-      res.write('\r\n', 'ascii');
+      res.write("--" + multipart + "\r\n", "ascii");
+      res.write("Content-Type: image/jpeg\r\n");
+      res.write("Content-Length: " + buffer.length + "\r\n");
+      res.write("\r\n", "ascii");
+      res.write(buffer, "binary");
+      res.write("\r\n", "ascii");
     },
     mjpegend: () => {
       res.end();
@@ -147,13 +186,14 @@ app.get('/api/mjpeg-stream', (req, res) => {
   const close = () => {
     const index = clients.indexOf(client);
     if (index !== -1) {
+      clients[index] = null;
       clients.splice(index, 1);
     }
   };
 
-  res.on('finish', close);
-  res.on('close', close);
-  res.on('error', close);
+  res.on("finish", close);
+  res.on("close", close);
+  res.on("error", close);
 
   clients.push(client);
 });
