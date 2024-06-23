@@ -4,7 +4,10 @@ const puppeteer = require("puppeteer");
 const app = express();
 const port = process.env.PORT || 3000;
 
+const baseUrl = "https://cloudlines-stream-trial-05.localcan.dev";
 let latestScreenshotBuffer = null;
+const waitDelay = 1000;
+const screenshotInterval = 500;
 
 const capture = async (page) => {
   const buffer = await page.screenshot({ encoding: "binary" });
@@ -12,7 +15,7 @@ const capture = async (page) => {
 
   setTimeout(async () => {
     await capture(page);
-  }, 1000); // 1-second interval
+  }, screenshotInterval); // 1-second interval
 };
 
 const main = async () => {
@@ -23,14 +26,15 @@ const main = async () => {
   });
   const page = await browser.newPage();
 
-  console.log("Setting viewport...");
-  await page.setViewport({ width: 1280, height: 720 });
+  const vp = { width: 640, height: 360 };
+  console.log(`Setting viewport to ${vp.width}x${vp.height}...`);
+  await page.setViewport(vp);
 
   console.log("Loading page...");
-  await page.goto("https://game.manada.dev/?cinematic&c_zoom=0.5");
+  await page.goto("https://game.manada.dev/?cinematic&c_zoom=0.175");
 
   console.log("Waiting to load...");
-  await new Promise((resolve) => setTimeout(resolve, 10000));
+  await new Promise((resolve) => setTimeout(resolve, waitDelay));
 
   console.log("Capturing screenshots...");
   await capture(page);
@@ -51,21 +55,24 @@ const sendScreenshotFrame = (req, res) => {
     res.set("Surrogate-Control", "no-store");
     res.send(`
         <!DOCTYPE html>
-        <html>
+      <html>
         <head>
-            <title>Latest frame</title>
-            <meta property="og:image" content="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream" />
-            <meta property="fc:frame" content="vNext" />
-            <meta property="fc:frame:image" content="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream" />
-            <meta property="fc:frame:button:1" content="Donate" />
-            <meta property="fc:frame:button:1:action" content="post" />
-            <meta property="fc:frame:button:1:target" content="https://frame-manada-trial-20.localcan.dev/api/next-frame" />
+          <title>Latest frame</title>
+          <meta property="og:image" content="${baseUrl}/api/single-screenshot" />
+          <meta property="fc:frame" content="vNext" />
+          <meta property="fc:frame:image" content="${baseUrl}/api/stream" />
+          <meta property="fc:frame:button:1" content="Donate" />
+          <meta property="fc:frame:button:1:action" content="post" />
+          <meta
+            property="fc:frame:button:1:target"
+            content="${baseUrl}/api/next-frame"
+          />
         </head>
         <body>
-            <h1>Basic Frame</h1>
-            <img src="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream" />
+          <h1>Basic Frame</h1>
+          <img src="${baseUrl}/api/stream" />
         </body>
-        </html>
+      </html>
     `);
   } else {
     res.status(404).send("No screenshot available");
@@ -84,22 +91,24 @@ const handlePostRequest = (req, res) => {
     res.set("Expires", "0");
     res.set("Surrogate-Control", "no-store");
     res.send(`
-        <!DOCTYPE html>
-        <html>
+      <html>
         <head>
-            <title>Latest frame</title>
-            <meta property="og:image" content="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream" />
-            <meta property="fc:frame" content="vNext" />
-            <meta property="fc:frame:image" content="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream" />
-            <meta property="fc:frame:button:1" content="Donate" />
-            <meta property="fc:frame:button:1:action" content="post" />
-            <meta property="fc:frame:button:1:target" content="https://frame-manada-trial-20.localcan.dev/api/next-frame" />
+          <title>Latest frame</title>
+          <meta property="og:image" content="${baseUrl}/api/single-screenshot" />
+          <meta property="fc:frame" content="vNext" />
+          <meta property="fc:frame:image" content="${baseUrl}/api/stream" />
+          <meta property="fc:frame:button:1" content="Donate" />
+          <meta property="fc:frame:button:1:action" content="post" />
+          <meta
+            property="fc:frame:button:1:target"
+            content="${baseUrl}/api/next-frame"
+          />
         </head>
         <body>
-            <h1>Basic Frame</h1>
-            <img src="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream" />
+          <h1>Basic Frame</h1>
+          <img src="${baseUrl}/api/stream" />
         </body>
-        </html>
+      </html>
     `);
   } else {
     res.status(404).send("No screenshot available");
@@ -108,7 +117,7 @@ const handlePostRequest = (req, res) => {
 
 const sendLatestScreenshot = (req, res) => {
   if (latestScreenshotBuffer) {
-    res.set("Content-Type", "image/png");
+    res.set("Content-Type", "image/jpeg");
     res.set(
       "Cache-Control",
       "no-store, no-cache, must-revalidate, proxy-revalidate"
@@ -132,29 +141,42 @@ app.get("/", (req, res) => {
   res.send(`
         <!DOCTYPE html>
         <html>
-  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="preload" as="image" href="https://cloudlines-frame-trial-83.localcan.dev/api/mjpeg-stream"><title>Cloudlines</title>
-  <meta name="fc:frame" content="vNext">
-  <meta name="fc:frame:post_url" content="https://cloudlines-frame-trial-83.localcan.dev/api/next-frame">
-  <meta name="fc:frame:image" content="https://cloudlines-frame-trial-83.localcan.dev/api/mjpeg-stream">
-  <meta property="fc:frame:button:1" content="Donate" />
-  <meta property="fc:frame:button:1:action" content="post" />
-  <meta property="fc:frame:button:1:target" content="https://frame-manada-trial-20.localcan.dev/api/next-frame" />
-  <meta property="og:title" content="Cloudlines">
-  <meta property="og:image" content="https://cloudlines-frame-trial-83.localcan.dev/api/single-screenshot">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Cloudlines">
-  <meta name="twitter:image" content="https://cloudlines-frame-trial-83.localcan.dev/api/single-screenshot"><link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="16x16">
-  <meta name="next-size-adjust"><script src="/_next/static/chunks/polyfills-c67a75d1b6f99dc8.js" nomodule=""></script></head>
-        <body>
-            <h1>Basic Frame</h1>
-            <img src="https://cloudlines-frame-trial-83.localcan.dev/api/mjpeg-stream" />
-        </body>
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <link rel="preload" as="image" href="${baseUrl}/api/stream" />
+            <title>Cloudlines</title>
+            <meta name="fc:frame" content="vNext" />
+            <meta name="fc:frame:post_url" content="${baseUrl}/api/next-frame" />
+            <meta name="fc:frame:image" content="${baseUrl}/api/stream" />
+            <meta property="fc:frame:button:1" content="Donate" />
+            <meta property="fc:frame:button:1:action" content="post" />
+            <meta
+              property="fc:frame:button:1:target"
+              content="${baseUrl}/api/next-frame"
+            />
+            <meta property="og:title" content="Cloudlines" />
+            <meta property="og:image" content="${baseUrl}/api/single-screenshot" />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content="Cloudlines" />
+            <meta name="twitter:image" content="${baseUrl}/api/single-screenshot" />
+            <link
+              rel="icon"
+              href="/favicon.ico"
+              type="image/x-icon"
+              sizes="16x16"
+            />
+          </head>
+          <body>
+            <h1>Cloudlines</h1>
+            <img src="/api/stream" />
+          </body>
         </html>
     `);
   }
 )
 
-app.get("/api/mjpeg-stream", (req, res) => {
+app.get("/api/stream", (req, res) => {
   var headers = {};
   var multipart = "--totalmjpeg";
 
@@ -203,7 +225,7 @@ setInterval(() => {
   if (latestScreenshotBuffer) {
     mjpegsend(latestScreenshotBuffer);
   }
-}, 1000);
+}, screenshotInterval);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
