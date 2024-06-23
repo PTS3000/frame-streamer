@@ -60,6 +60,7 @@ const sendScreenshotFrame = (req, res) => {
         </head>
         <body>
             <h1>Basic Frame</h1>
+            <img src="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream" />
         </body>
         </html>
     `);
@@ -90,6 +91,7 @@ const handlePostRequest = (req, res) => {
         </head>
         <body>
             <h1>Basic Frame</h1>
+            <img src="https://frame-manada-trial-20.localcan.dev/api/mjpeg-stream" />
         </body>
         </html>
     `);
@@ -114,28 +116,6 @@ const sendLatestScreenshot = (req, res) => {
 app.get('/api/next-frame', sendScreenshotFrame);
 app.post('/api/next-frame', handlePostRequest);
 app.get('/api/single-screenshot', sendLatestScreenshot);
-
-app.get('/api/stream', (req, res) => {
-  res.writeHead(200, {
-    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-    'Pragma': 'no-cache',
-    'Content-Type': 'multipart/x-mixed-replace; boundary=frame',
-  });
-
-  const sendImage = () => {
-    if (latestScreenshotBuffer) {
-      res.write(`--frame\r\nContent-Type: image/png\r\nContent-Length: ${latestScreenshotBuffer.length}\r\n\r\n`);
-      res.write(latestScreenshotBuffer);
-      res.write('\r\n');
-    }
-  };
-
-  const intervalId = setInterval(sendImage, 1000);
-
-  req.on('close', () => {
-    clearInterval(intervalId);
-  });
-});
 
 const clients = [];
 
