@@ -1,12 +1,12 @@
 import { Hono } from "hono";
-import { Fragment, type FC } from "hono/jsx";
+import { type FC, Fragment } from "hono/jsx";
 import { stream } from "hono/streaming";
-import puppeteer, { Page } from "puppeteer";
+import puppeteer, { type Page } from "puppeteer";
 import sharp from "sharp";
 
 const app = new Hono();
-const port = parseInt(process.env.PORT!) || 3000;
-const baseUrl = "https://cloudlines-stream-trial-05.localcan.dev";
+const port = Number.parseInt(process.env.PORT ?? "3000");
+const baseUrl = "https://cloudlines-stream-trial-59.localcan.dev";
 const streamUrl = `${baseUrl}/api/stream`;
 const latestUrl = `${baseUrl}/api/latest`;
 const waitDelay = 1000;
@@ -21,7 +21,7 @@ const FarcasterStream: FC = (_props) => {
   return (
     <Fragment>
       <title>Cloudlines</title>
-      <link rel="preload" as="image" href={`/api/stream`} />
+      <link rel="preload" as="image" href={"/api/stream"} />
       <meta name="fc:frame" content="vNext" />
       <meta name="fc:frame:post_url" content={`${baseUrl}/api/next-frame`} />
       <meta name="fc:frame:image" content={streamUrl} />
@@ -31,7 +31,7 @@ const FarcasterStream: FC = (_props) => {
 
 const MainFrame: FC = (_props) => {
   return (
-    <html>
+    <html lang="en">
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -50,17 +50,17 @@ const MainFrame: FC = (_props) => {
       </head>
       <body>
         <h1>Cloudlines Stream</h1>
-        <img src="/api/stream" />
+        <img src="/api/stream" alt="Live stream of Cloudlines" />
       </body>
     </html>
   );
 };
 
 app.get("/api/stream", (c) => {
-  var multipart = "--totalmjpeg";
+  const multipart = "--totalmjpeg";
   c.header(
     "Content-Type",
-    'multipart/x-mixed-replace; boundary="' + multipart + '"'
+    `multipart/x-mixed-replace; boundary="${multipart}"`
   );
   c.header("Cache-Control", "private, no-cache, no-store, max-age=0");
   c.header("Connection", "close");
@@ -70,9 +70,9 @@ app.get("/api/stream", (c) => {
     let live = true;
     const client = {
       mjpegwrite: (buffer: Buffer) => {
-        stream.write("--" + multipart + "\r\n");
+        stream.write(`--${multipart}\r\n`);
         stream.write("Content-Type: image/jpeg\r\n");
-        stream.write("Content-Length: " + buffer.length + "\r\n");
+        stream.write(`Content-Length: ${buffer.length}\r\n`);
         stream.write("\r\n");
         stream.write(buffer);
         stream.write("\r\n");
@@ -97,7 +97,7 @@ app.get("/api/stream", (c) => {
   });
 });
 
-app.get("/api/latest", (c) => {
+app.get("/api/latest", async (c) => {
   if (latestScreenshotBuffer) {
     c.header("Content-Type", "image/jpeg");
     c.header("Cache-Control", "private, no-cache, no-store, max-age=0");
@@ -111,9 +111,8 @@ app.get("/api/latest", (c) => {
       });
       await stream.write(latestScreenshotBuffer as Uint8Array);
     });
-  } else {
-    return c.status(404);
   }
+  return c.status(404);
 });
 
 app.get("*", (c) => {
@@ -127,11 +126,11 @@ const main = async () => {
       type: "jpeg",
       quality: 100,
     });
-    
+
     latestScreenshotBuffer = await sharp(buffer)
-    .resize(640)
-    .avif({ effort: 2 })
-    .toBuffer();
+      .resize(640)
+      .avif({ effort: 2 })
+      .toBuffer();
 
     setTimeout(async () => {
       await capture(page);
