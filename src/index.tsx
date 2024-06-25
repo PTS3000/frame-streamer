@@ -11,7 +11,6 @@ const streamUrl = `${baseUrl}/api/stream`;
 const latestUrl = `${baseUrl}/api/latest`;
 const waitDelay = 1000;
 const screenshotInterval = 40;
-// const vp = { width: 640, height: 360 };
 const vp = { width: 1280, height: 720 };
 let latestScreenshotBuffer: Buffer | null = null;
 
@@ -37,9 +36,13 @@ const MainFrame: FC = (_props) => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <FarcasterStream />
         <meta property="fc:frame:button:1" content="Cause a storm!" />
-        <meta property="fc:frame:button:1:action" content="post" />
+        <meta property="fc:frame:button:1:action" content="tx" />
         <meta
-          property="fc:frame:button:1:target"
+          property="fc:frame:button:1:target" 
+          content={`${baseUrl}/api/get_tx_data`}
+        />
+        <meta
+          property="fc:frame:button:1:post_url"
           content={`${baseUrl}/api/next-frame`}
         />
         <meta property="og:title" content="Cloudlines" />
@@ -115,46 +118,68 @@ app.get("/api/latest", async (c) => {
   return c.status(404);
 });
 
+app.get("/api/get_tx_data", (c) => {
+  const txData = {
+    chainId: "eip155:42161",
+    method: "eth_sendTransaction",
+    params: {
+      abi: [],
+      to: "0x1337420dED5ADb9980CFc35f8f2B054ea86f8aB1",
+      data: "0x",
+      value: "20000000000000000000", // 20 ARB in wei (1 ARB = 10^18 wei)
+    },
+  };
+  return c.json(txData);
+});
+
 app.get("*", (c) => {
   return c.html(<MainFrame />);
 });
 
 const main = async () => {
   const capture = async (page: Page) => {
-    const buffer = await page.screenshot({
-      encoding: "binary",
-      type: "jpeg",
-      quality: 100,
-    });
+    try {
+      const buffer = await page.screenshot({
+        encoding: "binary",
+        type: "jpeg",
+        quality: 100,
+      });
 
-    latestScreenshotBuffer = await sharp(buffer)
-      .resize(640)
-      .avif({ effort: 2 })
-      .toBuffer();
+      latestScreenshotBuffer = await sharp(buffer)
+        .resize(640)
+        .avif({ effort: 2 })
+        .toBuffer();
 
-    setTimeout(async () => {
-      await capture(page);
-    }, screenshotInterval); // 1-second interval
+      setTimeout(async () => {
+        await capture(page);
+      }, screenshotInterval);
+    } catch (error) {
+      console.error("Error capturing screenshot:", error);
+    }
   };
 
-  console.log("Starting browser...");
-  const browser = await puppeteer.launch({
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    headless: "new",
-  });
-  const page = await browser.newPage();
+  try {
+    console.log("Starting browser...");
+    const browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: "new",
+    });
+    const page = await browser.newPage();
 
-  console.log(`Setting viewport to ${vp.width}x${vp.height}...`);
-  await page.setViewport(vp);
+    console.log(`Setting viewport to ${vp.width}x${vp.height}...`);
+    await page.setViewport(vp);
 
-  console.log("Loading page...");
-  await page.goto("https://game.manada.dev/?cinematic&c_zoom=0.175");
+    console.log("Loading page...");
+    await page.goto("https://game.manada.dev/?cinematic&c_zoom=0.175");
 
-  console.log("Waiting to load...");
-  await new Promise((resolve) => setTimeout(resolve, waitDelay));
+    console.log("Waiting to load...");
+    await new Promise((resolve) => setTimeout(resolve, waitDelay));
 
-  console.log("Capturing screenshots...");
-  await capture(page);
+    console.log("Capturing screenshots...");
+    await capture(page);
+  } catch (error) {
+    console.error("Error in main function:", error);
+  }
 };
 
 main();
