@@ -46,10 +46,10 @@ const MainFrame: FC = (_props) => {
           content={`${baseUrl}`}
         />
         <meta property="og:title" content="Cloudlines" />
-        <meta property="og:image" content={latestUrl} />
+        <meta property="og:image" content={streamUrl} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Cloudlines" />
-        <meta name="twitter:image" content={latestUrl} />
+        <meta name="twitter:image" content={streamUrl} />
       </head>
       <body>
         <h1>Cloudlines Stream</h1>
@@ -62,13 +62,13 @@ const MainFrame: FC = (_props) => {
 app.get("/api/get-tx-data", (c) => {
   console.log('Transaction data endpoint was queried');
   const txData = {
-    chainId: "eip155:10",
+    chainId: "eip155:42161",
     method: "eth_sendTransaction",
     params: {
       abi: [],
-      to: "0x00000000fcCe7f938e7aE6D3c335bD6a1a7c593D",
+      to: "0x7c9a3a87433980097465cc271b945fa2c073a77b",
       data: "0x783a112b0000000000000000000000000000000000000000000000000000000000000e250000000000000000000000000000000000000000000000000000000000000001",
-      value: "984316556204476",
+      value: "200000000000000",
     },
   };
 
@@ -140,6 +140,20 @@ app.get("/api/latest", async (c) => {
 });
 
 app.get("/api/get_tx_data", (c) => {
+  const txData = {
+    chainId: "eip155:42161",
+    method: "eth_sendTransaction",
+    params: {
+      abi: [],
+      to: "0x1337420dED5ADb9980CFc35f8f2B054ea86f8aB1",
+      data: "0x",
+      value: "20000000000000000000", // 20 ARB in wei (1 ARB = 10^18 wei)
+    },
+  };
+  return c.json(txData);
+});
+
+app.post("/api/get_tx_data", (c) => {
   const txData = {
     chainId: "eip155:42161",
     method: "eth_sendTransaction",
