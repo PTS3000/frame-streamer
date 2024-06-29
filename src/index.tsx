@@ -22,7 +22,7 @@ const FarcasterStream: FC = (_props) => {
       <title>Cloudlines</title>
       <link rel="preload" as="image" href={"/api/stream"} />
       <meta name="fc:frame" content="vNext" />
-      <meta name="fc:frame:post_url" content={`${baseUrl}/api/next-frame`} />
+      <meta name="fc:frame:post_url" content={`${baseUrl}/api/get-tx-data`} />
       <meta name="fc:frame:image" content={streamUrl} />
     </Fragment>
   );
@@ -59,7 +59,7 @@ const MainFrame: FC = (_props) => {
   );
 };
 
-app.get("/api/get-tx-data", (c) => {
+app.post("/api/get-tx-data", (c) => {
   console.log('Transaction data endpoint was queried');
   const txData = {
     chainId: "eip155:42161",
