@@ -6,7 +6,7 @@ import sharp from "sharp";
 
 const app = new Hono();
 const port = Number.parseInt(process.env.PORT ?? "8080");
-const baseUrl = "https://manda-81.localcan.dev";
+const baseUrl = "https://manda-f-45.localcan.dev";
 const streamUrl = `${baseUrl}/api/stream`;
 const latestUrl = `${baseUrl}/api/latest`;
 const waitDelay = 1000;
@@ -66,9 +66,9 @@ app.post("/api/get-tx-data", (c) => {
     method: "eth_sendTransaction",
     params: {
       abi: [],
-      to: "0x7c9a3a87433980097465cc271b945fa2c073a77b",
+      to: "0xb6e2c33c4A1D17ae596f92ed109cb998440e7b03",
       data: "0x783a112b0000000000000000000000000000000000000000000000000000000000000e250000000000000000000000000000000000000000000000000000000000000001",
-      value: "200000000000000",
+      value: "1000", // 20 ARB in wei (1 ARB = 10^18 wei)
     },
   };
 
@@ -147,7 +147,7 @@ app.get("/api/get_tx_data", (c) => {
       abi: [],
       to: "0x1337420dED5ADb9980CFc35f8f2B054ea86f8aB1",
       data: "0x",
-      value: "20000000000000000000", // 20 ARB in wei (1 ARB = 10^18 wei)
+      value: "10000000000000000000", // 20 ARB in wei (1 ARB = 10^18 wei)
     },
   };
   return c.json(txData);
