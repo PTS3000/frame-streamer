@@ -6,7 +6,7 @@ import sharp from "sharp";
 
 const app = new Hono();
 const port = Number.parseInt(process.env.PORT ?? "8080");
-const baseUrl = "https://manda-81.localcan.dev";
+const baseUrl = "https://frame-77.localcan.dev";
 const streamUrl = `${baseUrl}/api/stream`;
 const latestUrl = `${baseUrl}/api/latest`;
 const waitDelay = 1000;
