@@ -6,7 +6,9 @@
     "dev": "bun run --hot src/index.tsx"
   },
   "dependencies": {
-    "hono": "^4.4.7",
+    "@hono/node-server": "^1.11.4",
+    "express": "^4.19.2",
+    "hono": "^4.4.9",
     "puppeteer": "^19.11.1",
     "sharp": "^0.33.4"
   },

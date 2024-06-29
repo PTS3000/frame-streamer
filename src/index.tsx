@@ -5,8 +5,8 @@ import puppeteer, { type Page } from "puppeteer";
 import sharp from "sharp";
 
 const app = new Hono();
-const port = Number.parseInt(process.env.PORT ?? "3000");
-const baseUrl = "https://cloudlines-stream-trial-59.localcan.dev";
+const port = Number.parseInt(process.env.PORT ?? "8080");
+const baseUrl = "https://frame-77.localcan.dev";
 const streamUrl = `${baseUrl}/api/stream`;
 const latestUrl = `${baseUrl}/api/latest`;
 const waitDelay = 1000;
@@ -35,15 +35,15 @@ const MainFrame: FC = (_props) => {
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <FarcasterStream />
-        <meta property="fc:frame:button:1" content="Cause a storm!" />
+        <meta property="fc:frame:button:1" content="Storm" />
         <meta property="fc:frame:button:1:action" content="tx" />
         <meta
           property="fc:frame:button:1:target" 
-          content={`${baseUrl}/api/get_tx_data`}
+          content={`${baseUrl}/api/get-tx-data`}
         />
         <meta
           property="fc:frame:button:1:post_url"
-          content={`${baseUrl}/api/next-frame`}
+          content={`${baseUrl}`}
         />
         <meta property="og:title" content="Cloudlines" />
         <meta property="og:image" content={latestUrl} />
@@ -58,6 +58,27 @@ const MainFrame: FC = (_props) => {
     </html>
   );
 };
+
+app.get("/api/get-tx-data", (c) => {
+  console.log('Transaction data endpoint was queried');
+  const txData = {
+    chainId: "eip155:10",
+    method: "eth_sendTransaction",
+    params: {
+      abi: [],
+      to: "0x00000000fcCe7f938e7aE6D3c335bD6a1a7c593D",
+      data: "0x783a112b0000000000000000000000000000000000000000000000000000000000000e250000000000000000000000000000000000000000000000000000000000000001",
+      value: "984316556204476",
+    },
+  };
+
+  c.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  c.header('Pragma', 'no-cache');
+  c.header('Expires', '0');
+  c.header('Surrogate-Control', 'no-store');
+
+  return c.json(txData);
+});
 
 app.get("/api/stream", (c) => {
   const multipart = "--totalmjpeg";
