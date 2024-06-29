@@ -6,7 +6,7 @@ import sharp from "sharp";
 
 const app = new Hono();
 const port = Number.parseInt(process.env.PORT ?? "8080");
-const baseUrl = "https://manda-f-45.localcan.dev";
+const baseUrl = "https://manada2-52.localcan.dev";
 const streamUrl = `${baseUrl}/api/stream`;
 const latestUrl = `${baseUrl}/api/latest`;
 const waitDelay = 1000;
@@ -22,7 +22,7 @@ const FarcasterStream: FC = (_props) => {
       <title>Cloudlines</title>
       <link rel="preload" as="image" href={"/api/stream"} />
       <meta name="fc:frame" content="vNext" />
-      <meta name="fc:frame:post_url" content={`${baseUrl}/api/get-tx-data`} />
+      <meta name="fc:frame:post_url" content={`${baseUrl}`} />
       <meta name="fc:frame:image" content={streamUrl} />
     </Fragment>
   );
@@ -151,6 +151,10 @@ app.get("/api/get_tx_data", (c) => {
     },
   };
   return c.json(txData);
+});
+
+app.post("*", (c) => {
+  return c.html(<MainFrame />);
 });
 
 app.get("*", (c) => {
