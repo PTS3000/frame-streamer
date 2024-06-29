@@ -6,7 +6,7 @@ import sharp from "sharp";
 
 const app = new Hono();
 const port = Number.parseInt(process.env.PORT ?? "8080");
-const baseUrl = "https://manada2-52.localcan.dev";
+const baseUrl = "https://framer-54.localcan.dev";
 const streamUrl = `${baseUrl}/api/stream`;
 const latestUrl = `${baseUrl}/api/latest`;
 const waitDelay = 1000;
@@ -50,6 +50,7 @@ const MainFrame: FC = (_props) => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Cloudlines" />
         <meta name="twitter:image" content={streamUrl} />
+      
       </head>
       <body>
         <h1>Cloudlines Stream</h1>
@@ -68,7 +69,7 @@ app.post("/api/get-tx-data", (c) => {
       abi: [],
       to: "0xb6e2c33c4A1D17ae596f92ed109cb998440e7b03",
       data: "0x783a112b0000000000000000000000000000000000000000000000000000000000000e250000000000000000000000000000000000000000000000000000000000000001",
-      value: "1000", // 20 ARB in wei (1 ARB = 10^18 wei)
+      value: "1000000000000000", // 20 ARB in wei (1 ARB = 10^18 wei)
     },
   };
 
