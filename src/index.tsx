@@ -6,11 +6,11 @@ import sharp from "sharp";
 
 const app = new Hono();
 const port = Number.parseInt(process.env.PORT ?? "8080");
-const baseUrl = "https://manadaframe-13.localcan.dev";
+const baseUrl = "https://framer4-40.localcan.dev";
 const streamUrl = `${baseUrl}/api/stream`;
 const latestUrl = `${baseUrl}/api/latest`;
 const waitDelay = 1000;
-const screenshotInterval = 40;
+const screenshotInterval = 10;
 const vp = { width: 1280, height: 720 };
 let latestScreenshotBuffer: Buffer | null = null;
 
