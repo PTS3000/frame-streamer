@@ -6,11 +6,11 @@ import sharp from "sharp";
 
 const app = new Hono();
 const port = Number.parseInt(process.env.PORT ?? "8080");
-const baseUrl = "https://framer4-40.localcan.dev";
+const baseUrl = "https://frame.manada.dev";
 const streamUrl = `${baseUrl}/api/stream`;
 const latestUrl = `${baseUrl}/api/latest`;
 const waitDelay = 1000;
-const screenshotInterval = 10;
+const screenshotInterval = 100;
 const vp = { width: 1280, height: 720 };
 let latestScreenshotBuffer: Buffer | null = null;
 
@@ -67,9 +67,9 @@ app.post("/api/get-tx-data", (c) => {
     method: "eth_sendTransaction",
     params: {
       abi: [],
-      to: "0xb6e2c33c4A1D17ae596f92ed109cb998440e7b03",
+      to: "0x9464EdEa4F13AE45576d88d4A557Ce6E6c00164d",
       data: "0x783a112b0000000000000000000000000000000000000000000000000000000000000e250000000000000000000000000000000000000000000000000000000000000001",
-      value: "1000000000000000", // 20 ARB in wei (1 ARB = 10^18 wei)
+      value: "6000000000000000", // 20 ARB in wei (1 ARB = 10^18 wei)
     },
   };
 
@@ -140,7 +140,7 @@ app.get("/api/latest", async (c) => {
   return c.status(404);
 });
 
-app.get("/api/get_tx_data", (c) => {
+app.get("/api/get-tx-data", (c) => {
   const txData = {
     chainId: "eip155:42161",
     method: "eth_sendTransaction",
